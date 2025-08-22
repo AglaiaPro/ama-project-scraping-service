@@ -20,28 +20,20 @@ class BaseScraper:
         multiple = field.get("multiple", False)
 
         try:
-            if field_type == "self":
-                # Получаем данные напрямую из текущего элемента
-                if attribute:
-                    return driver_or_elem.get_attribute(attribute).strip()
-                else:
-                    return driver_or_elem.text.strip()
-
             by = self.get_by_type(field_type)
-
             if multiple:
                 elements = driver_or_elem.find_elements(by, value)
                 if attribute is None:
-                    return [elem.text.strip() for elem in elements]
+                    return [elem.text.strip() for elem in elements if elem.text]
                 else:
                     return [elem.get_attribute(attribute).strip() for elem in elements if elem.get_attribute(attribute)]
             else:
                 # Один элемент
                 element = driver_or_elem.find_element(by, value)
                 if attribute is None:
-                    return element.text.strip()
+                    return element.text.strip() if element.text else None
                 else:
-                    return element.get_attribute(attribute).strip()
+                    return element.get_attribute(attribute).strip() if element.get_attribute(attribute) else None
 
         except NoSuchElementException:
             return None

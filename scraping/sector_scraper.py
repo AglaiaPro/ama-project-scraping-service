@@ -8,7 +8,7 @@ class SectorScraper(BaseScraper):
         self.driver = driver
         self.template = template
 
-    def get_companies(self, start_url, max_pages=1):
+    def get_companies(self, start_url, max_pages=2):
         companies = []
         current_url = start_url
         page_count = 0
@@ -32,7 +32,7 @@ class SectorScraper(BaseScraper):
 
                     # company URL
                     url = self.extract_field(elem, fields['url'])
-
+                    print(f'===   Name {name} and url {url}\n')
                     if name and url:
                         companies.append({
                             "name": name,
@@ -44,8 +44,10 @@ class SectorScraper(BaseScraper):
 
             # Переход на следующую страницу # Pagination
             current_url = self.extract_field(self.driver, fields['next_page_selector'])
+            print(f'Текущая ссылка: {current_url}')
             if not current_url:
-                break
+                print('The following link was not found')
+                return companies
             page_count += 1
 
         return companies
