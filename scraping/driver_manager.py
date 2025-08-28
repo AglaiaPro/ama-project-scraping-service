@@ -54,3 +54,4 @@ def setup_stealth_driver():
             fix_hairline=True,
             )
     return driver
+
