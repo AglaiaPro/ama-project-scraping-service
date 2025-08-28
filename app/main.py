@@ -1,12 +1,11 @@
-from fastapi import FastAPI, HTTPException
+from bson import ObjectId
+from fastapi import FastAPI, HTTPException, BackgroundTasks
 from pydantic import BaseModel
 from services.scraping_service import ScrapingService
 from services.handle_refresh_company import HandleRefreshCompany
 from app.exceptions import SectorNotFound, ScrapingTemplateNotFound, CompanyNotFound
 
 app = FastAPI()
-scraping_service = ScrapingService()
-handle_refresh_company = HandleRefreshCompany()
 
 
 class LinkRequest(BaseModel):
@@ -15,13 +14,18 @@ class LinkRequest(BaseModel):
 
 class RefreshCompanyRequest(BaseModel):
     link: str
+    id: str
 
 
 # endpoint firstcustomscraping для взаимодействия с custom scraping
 @app.post('/firstcustomscraping')
-async def custom_scraping(request: LinkRequest):
+async def custom_scraping(request: LinkRequest, background_tasks: BackgroundTasks):
     try:
-        return scraping_service.run(request.link)
+        scraping_service = ScrapingService()
+        background_tasks.add_task(scraping_service.run, request.link)
+        return {
+            "message": "Scraping started"
+        }
     except SectorNotFound as e:
         raise HTTPException(status_code=404, detail=str(e))
     except ScrapingTemplateNotFound as e:
@@ -34,7 +38,8 @@ async def custom_scraping(request: LinkRequest):
 @app.post('/refreshcompany')
 async def update_checker_bot(request: RefreshCompanyRequest):
     try:
-        return handle_refresh_company.run(request.link)
+        handle_refresh_company = HandleRefreshCompany()
+        return handle_refresh_company.run(company_url=request.link, company_id=ObjectId(request.id))
     except CompanyNotFound as e:
         raise HTTPException(status_code=404, detail=str(e))
     except SectorNotFound as e:
@@ -43,8 +48,3 @@ async def update_checker_bot(request: RefreshCompanyRequest):
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f'Unexpected error: {e}')
-
-
-
-
-#testLink = 'https://www.finder.fi/search?what=IT+ja+ohjelmistot&sort=TURNOVER_desc'

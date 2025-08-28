@@ -1,20 +1,89 @@
-# Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+# Scraping Service
+This microservice is responsible for scraping companies from specified website sectors 
+using predefined templates stored in the database.
+In addition to collecting new companies, it can also update the data of an existing company by its link.
 
-# Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
+# Features
+- Scrape a list of companies from a sector page.
+- Scrape detailed information about each company.
+- Save results into MongoDB.
+- Run scraping as a background task (via FastAPI BackgroundTasks).
+- Update an existing company’s data by URL.
+- Fully compatible with the custom-scraping and update-checker microservices.
 
-# Build and Test
-TODO: Describe and show how to build your code and run the tests. 
+# Settings
+The main configuration is located in config/settings.py
 
-# Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
+MONGO_URI = "mongodb+srv://<USERNAME>:<PASSWORD>@cluster0.ykuoi.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+- Replace <USERNAME> and <PASSWORD> with your MongoDB credentials.
+- By default, the service is configured for MongoDB Atlas, but it can be pointed to a local MongoDB instance as well.
 
-If you want to learn more about creating good readme files then refer the following [guidelines](https://docs.microsoft.com/en-us/azure/devops/repos/git/create-a-readme?view=azure-devops). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
+MAX_PAGES = 2
+- Defines the maximum number of pages to crawl when scraping companies from a sector.
+- This limit prevents the service from scraping all available companies (which could be in the thousands).
+- Increase this value if you need to collect more companies.
+
+# API Endpoints
+
+## POST /firstcustomscraping 
+Starts scraping for a given sector link which is obtained from the custom-scraping service
+
+Request:
+{
+  "link": "https://example.com/some-sector"
+}
+
+Response:
+{
+  "message": "Scraping started"
+}
+
+## POST /refreshcompany
+Updates company data for a given company URL which is obtained from the update-checker bot service
+
+Request:
+{
+  "link": "https://example.com/company/123",
+  "id": "64b8f3e4a1b2c3d4e5f6a7b8"
+}
+
+Response:
+{
+  "success": true,
+  "message": "Company data updated for: https://example.com/company/123"
+}
+
+# MongoDB Collections
+
+This service uses three main collections:
+
+- companies — stores scraped company data
+- business_sectors — stores sector links
+- scraping_templates — stores scraping templates for sectors
+You can check connectivity by pinging MongoDB on startup.
+
+## Installation & Run
+
+### 1. Clone the repository
+
+git clone https://github.com/your-repo/scraping_service.git
+cd scraping_service
+
+### 2. Create a virtual environment and install packages
+python -m venv venv
+source venv/bin/activate   # Linux/macOS
+venv\Scripts\activate      # Windows
+pip install -r requirements.txt
+
+### 4. Run service
+uvicorn app.main:app --reload --port 8001
+Swagger docs: http://127.0.0.1:8001/docs
+
+# Notes
+Selenium runs in headless mode with randomized User-Agent, window size, and other parameters to bypass anti-bot measures.
+MAX_PAGES prevents scraping too many pages at once; adjust it according to your needs.
+All scraping tasks are run safely with exception handling, and errors are logged for debugging.
+
+# Deployment
+This service is containerized and runs inside Docker as part of the overall microservices system.
+All dependencies are installed automatically within the Docker environment.

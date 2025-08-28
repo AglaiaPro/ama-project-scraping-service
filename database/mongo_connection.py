@@ -1,8 +1,10 @@
 from pymongo.mongo_client import MongoClient
 from config.settings import MONGO_URI
 
+
 def get_mongo_client():
     return MongoClient(MONGO_URI)
+
 
 def get_collections():
     try:

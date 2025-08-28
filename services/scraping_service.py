@@ -1,3 +1,4 @@
+from config.settings import MAX_PAGES
 from scraping.driver_manager import setup_stealth_driver
 from database.mongo_connection import get_collections
 from app.exceptions import SectorNotFound, ScrapingTemplateNotFound
@@ -33,22 +34,15 @@ class ScrapingService:
             driver = setup_stealth_driver()
 
             sector_scraper = SectorScraper(driver, page_companies_temp)
-            companies = sector_scraper.get_companies(link)
+            companies = sector_scraper.get_companies(link, MAX_PAGES)
             print(f'Найдено компаний {len(companies)}')
 
             company_scraper = CompanyScraper(company_template, sector_id)
             results = company_scraper.scrape_companies(companies)
 
             if results:
-                self.companies_collection.delete_many({})
                 self.companies_collection.insert_many(results)
                 print('Successfully saved all data in the database.')
-
-            return {
-                "success": True,
-                "companies_count": len(results),
-                "message": f"Data scraped and saved for link: {link}"
-            }
 
         finally:
             if driver:

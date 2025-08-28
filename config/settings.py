@@ -1,2 +1,4 @@
 MONGO_URI = "mongodb+srv://Aglaia_AMA_W:ErkkiEsimerkki23@cluster0.ykuoi.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 #Replace Aglaia_AMA_W with your MongoDB username and ErkkiEsimerkki23 with your MongoDB password
+
+MAX_PAGES = 2

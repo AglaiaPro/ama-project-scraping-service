@@ -29,7 +29,7 @@ class CompanyScraper(BaseScraper):
 
             html_page = driver.page_source
             details['hash'] = self.clean_html_and_hash(html_page)
-
+            print(f'--- {company_url}')
             print(f"[OK] {details['name']} — hash: {details['hash']}")
             return details
 
@@ -105,7 +105,8 @@ class CompanyScraper(BaseScraper):
                     del tag.attrs[attr]
 
         # 3. Убираем лишние пробелы и пустые строки
-        clean_text = soup.body.get_text(separator=' ', strip=True)
+
+        clean_text = soup.body.get_text(separator=' ', strip=True) if soup.body else soup.get_text(separator=' ', strip=True)
         clean_text = re.sub(r'\s+', ' ', clean_text)
 
         return hashlib.md5(clean_text.encode('utf-8')).hexdigest()

@@ -8,7 +8,7 @@ class SectorScraper(BaseScraper):
         self.driver = driver
         self.template = template
 
-    def get_companies(self, start_url, max_pages=2):
+    def get_companies(self, start_url, max_pages):
         companies = []
         current_url = start_url
         page_count = 0
