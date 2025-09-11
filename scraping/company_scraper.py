@@ -30,7 +30,7 @@ class CompanyScraper(BaseScraper):
             html_page = driver.page_source
             details['hash'] = self.clean_html_and_hash(html_page)
             print(f'--- {company_url}')
-            print(f"[OK] {details['name']} — hash: {details['hash']}")
+            # print(f"[OK] {details['name']} — hash: {details['hash']}")
             return details
 
         except Exception as e:
