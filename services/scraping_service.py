@@ -1,4 +1,4 @@
-from config.settings import MAX_PAGES
+from config.settings import COMPANY_SCRAPE_CONCURRENCY, MAX_PAGES
 from scraping.driver_manager import setup_stealth_driver
 from database.mongo_connection import get_collections
 from app.exceptions import SectorNotFound, ScrapingTemplateNotFound
@@ -37,7 +37,11 @@ class ScrapingService:
             companies = sector_scraper.get_companies(link, MAX_PAGES)
             print(f'Найдено компаний {len(companies)}')
 
-            company_scraper = CompanyScraper(company_template, sector_id)
+            company_scraper = CompanyScraper(
+                company_template,
+                sector_id,
+                max_concurrency=COMPANY_SCRAPE_CONCURRENCY,
+            )
             results = company_scraper.scrape_companies(companies)
 
             if results:

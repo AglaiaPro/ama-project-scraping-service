@@ -12,16 +12,11 @@ In addition to collecting new companies, it can also update the data of an exist
 - Fully compatible with the custom-scraping and update-checker microservices.
 
 # Settings
-The main configuration is located in config/settings.py
+Create `.env` from `.env.example` and configure:
 
-MONGO_URI = "mongodb+srv://<USERNAME>:<PASSWORD>@cluster0.ykuoi.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-- Replace <USERNAME> and <PASSWORD> with your MongoDB credentials.
-- By default, the service is configured for MongoDB Atlas, but it can be pointed to a local MongoDB instance as well.
-
-MAX_PAGES = 2
-- Defines the maximum number of pages to crawl when scraping companies from a sector.
-- This limit prevents the service from scraping all available companies (which could be in the thousands).
-- Increase this value if you need to collect more companies.
+- `MONGO_URI` — MongoDB connection string.
+- `MAX_PAGES` — maximum number of sector pages to crawl, default `2`.
+- `COMPANY_SCRAPE_CONCURRENCY` — how many company browser sessions can run in parallel, default `3`.
 
 # API Endpoints
 
@@ -76,7 +71,7 @@ venv\Scripts\activate      # Windows
 pip install -r requirements.txt
 
 ### 4. Run service
-uvicorn app.main:app --reload --port 8001
+uvicorn main:app --reload --port 8001
 Swagger docs: http://127.0.0.1:8001/docs
 
 # Notes

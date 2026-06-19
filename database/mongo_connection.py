@@ -1,9 +1,14 @@
 from pymongo.mongo_client import MongoClient
+from pymongo.errors import PyMongoError
+
 from config.settings import MONGO_URI
 
 
 def get_mongo_client():
-    return MongoClient(MONGO_URI)
+    if not MONGO_URI:
+        raise PyMongoError("MONGO_URI environment variable is not configured")
+
+    return MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
 
 
 def get_collections():
@@ -15,5 +20,4 @@ def get_collections():
         print("Pinged your deployment. You successfully connected to MongoDB!")
         return db.companies, db.business_sectors, db.scraping_templates
     except Exception as e:
-        print(e)
-        return None
+        raise PyMongoError(f"Could not connect to MongoDB: {e}") from e

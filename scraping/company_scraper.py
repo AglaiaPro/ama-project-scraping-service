@@ -1,4 +1,4 @@
-# Класс для детального сбора данных о компании
+from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import random
 import re
@@ -10,9 +10,10 @@ from scraping.driver_manager import setup_stealth_driver
 
 
 class CompanyScraper(BaseScraper):
-    def __init__(self, template, sector_id=None):
+    def __init__(self, template, sector_id=None, max_concurrency=3):
         self.template = template
         self.sector_id = sector_id
+        self.max_concurrency = max(1, max_concurrency)
 
     def scrape_company(self, company_url):
         driver = None
@@ -41,14 +42,10 @@ class CompanyScraper(BaseScraper):
                 driver.quit()
 
     def scrape_companies(self, companies):
-        results = []
-        for company in companies:
-            url = company.get('url')
-            if url:
-                details = self.scrape_company(url)
-                if details:
-                    results.append(details)
-        return results
+        urls = [company.get('url') for company in companies if company.get('url')]
+        with ThreadPoolExecutor(max_workers=self.max_concurrency) as executor:
+            scraped_companies = executor.map(self.scrape_company, urls)
+        return [details for details in scraped_companies if details]
 
     def parse_fields(self, driver, fields):
         result = {}
